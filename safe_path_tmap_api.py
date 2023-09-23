@@ -1,6 +1,29 @@
 import requests
 import folium
 from folium import plugins
+import math
+
+
+def haversine(lat1, lon1, lat2, lon2):
+    # 지구의 반경 (지구의 반경은 평균 반경을 사용합니다)
+    radius = 6371  # 지구 반경 (단위: 킬로미터)
+
+    # 라디안으로 변환
+    lat1 = math.radians(lat1)
+    lon1 = math.radians(lon1)
+    lat2 = math.radians(lat2)
+    lon2 = math.radians(lon2)
+
+    # 위도와 경도의 차이 계산
+    dlat = lat2 - lat1
+    dlon = lon2 - lon1
+
+    # Haversine 공식을 사용하여 거리 계산
+    a = math.sin(dlat/2)**2 + math.cos(lat1) * math.cos(lat2) * math.sin(dlon/2)**2
+    c = 2 * math.atan2(math.sqrt(a), math.sqrt(1-a))
+    distance = radius * c
+
+    return distance
 
 
 start_lat = 35.22241510564285
@@ -48,5 +71,16 @@ plugins.PolyLineTextPath(
     offset=7,
     attributes={'fill': 'red', 'font-weight': 'bold', 'font-size': '12'},
 ).add_to(m)
+
+# 1번째 ">"와 10번째 ">"의 좌표
+coord_1st_arrow = (coordinates[0][0], coordinates[0][1])  # 1번째 ">"
+coord_10th_arrow = (coordinates[9][0], coordinates[9][1])  # 10번째 ">"
+
+# 거리 계산 (예: haversine 함수 사용)
+distance_between_arrows = haversine(coord_1st_arrow[0], coord_1st_arrow[1], coord_10th_arrow[0], coord_10th_arrow[1])
+
+# Folium 지도에 원 그리기
+circle = folium.Circle(coord_1st_arrow, radius=distance_between_arrows*1000, color='red', fill=True, fill_opacity=0.2)
+circle.add_to(m)
 
 m.save('safe_path_tmap.html')
