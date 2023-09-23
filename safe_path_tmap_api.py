@@ -2,6 +2,7 @@ import requests
 import folium
 from folium import plugins
 import math
+import pandas as pd
 
 
 def haversine(lat1, lon1, lat2, lon2):
@@ -72,15 +73,30 @@ plugins.PolyLineTextPath(
     attributes={'fill': 'red', 'font-weight': 'bold', 'font-size': '12'},
 ).add_to(m)
 
-# 1번째 ">"와 10번째 ">"의 좌표
-coord_1st_arrow = (coordinates[0][0], coordinates[0][1])  # 1번째 ">"
-coord_10th_arrow = (coordinates[9][0], coordinates[9][1])  # 10번째 ">"
+interval = 10
 
-# 거리 계산 (예: haversine 함수 사용)
-distance_between_arrows = haversine(coord_1st_arrow[0], coord_1st_arrow[1], coord_10th_arrow[0], coord_10th_arrow[1])
+for i in range(interval):
+    start_idx = i * len(coordinates) // interval
+    end_idx = (i + 1) * len(coordinates) // interval
+    end_idx = min(end_idx, len(coordinates) - 1)
 
-# Folium 지도에 원 그리기
-circle = folium.Circle(coord_1st_arrow, radius=distance_between_arrows*1000, color='red', fill=True, fill_opacity=0.2)
-circle.add_to(m)
+    start_coord = coordinates[start_idx]
+    end_coord = coordinates[end_idx]
+
+    distance_between_arrows = haversine(start_coord[0], start_coord[1], end_coord[0], end_coord[1])
+
+    circle_center = ((start_coord[0] + end_coord[0]) / 2, (start_coord[1] + end_coord[1]) / 2)
+
+    # Folium 지도에 원 그리기
+    circle = folium.Circle(circle_center, radius=distance_between_arrows * 500, color='red', fill=True, fill_opacity=0.2)
+    circle.add_to(m)
+
+cctv_data_file = r"C:\Users\minsoo\OneDrive - 창원대학교\바탕 화면\창원cctv_data.csv"
+cctv_df = pd.read_csv(cctv_data_file)
+cctv_locations = cctv_df[['WGS84위도', 'WGS84경도']]
+# CCTV 위치 - Marker
+for _, row in cctv_locations.iterrows():
+    lat, lon = row['WGS84위도'], row['WGS84경도']
+    folium.Marker([lat, lon], icon=folium.Icon(color='green'), tooltip='CCTV 위치').add_to(m)
 
 m.save('safe_path_tmap.html')
