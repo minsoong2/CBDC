@@ -1,13 +1,15 @@
 import requests
 import folium
 from folium import plugins
-import math
 import pandas as pd
+import haversine
+import math
+from folium.plugins import MarkerCluster
 
 
 def haversine(lat1, lon1, lat2, lon2):
-    # 지구 radius
-    radius = 6371  # km
+    # 지구 radius (km)
+    radius = 6371
 
     lat1 = math.radians(lat1)
     lon1 = math.radians(lon1)
@@ -67,6 +69,33 @@ plugins.PolyLineTextPath(
     attributes={'fill': 'red', 'font-weight': 'bold', 'font-size': '12'},
 ).add_to(m)
 
+# MarkerCluster object - marker 표시
+marker_cluster = MarkerCluster()
+
+cctv_data_file = r"C:\Users\minsoo\OneDrive - 창원대학교\바탕 화면\창원cctv_data.csv"
+cctv_df = pd.read_csv(cctv_data_file)
+cctv_locations = cctv_df[['WGS84위도', 'WGS84경도']]
+
+# color argument of Icon should be one of:
+# {'black', 'white', 'green', 'lightgreen', 'darkred', 'lightred', 'cadetblue', 'red', 'darkpurple',
+# 'orange', 'purple', 'darkgreen', 'blue', 'lightgray', 'pink', 'gray', 'lightblue', 'beige', 'darkblue'}
+
+# CCTV 위치 - Marker
+for _, row in cctv_locations.iterrows():
+    lat, lon = row['WGS84위도'], row['WGS84경도']
+    folium.Marker([lat, lon], icon=folium.Icon(color='lightblue'), tooltip='CCTV 위치').add_to(marker_cluster)
+
+police_data_file = r"C:\Users\minsoo\OneDrive - 창원대학교\바탕 화면\창원police_data.csv"
+police_df = pd.read_csv(police_data_file)
+police_locations = police_df[['위도', '경도']]
+
+# Police 위치 - Marker
+for _, row in police_locations.iterrows():
+    lat, lon = row['위도'], row['경도']
+    folium.Marker([lat, lon], icon=folium.Icon(color='blue'), tooltip='경찰서 위치').add_to(marker_cluster)
+
+marker_cluster.add_to(m)
+
 interval = 10
 
 for i in range(interval):
@@ -81,26 +110,37 @@ for i in range(interval):
 
     circle_center = ((start_coord[0] + end_coord[0]) / 2, (start_coord[1] + end_coord[1]) / 2)
 
-    # Folium 지도에 원 그리기
-    circle = folium.Circle(circle_center, radius=distance_between_arrows * 500, color='red', fill=True, fill_opacity=0.2)
+    # 원 안에 있는 CCTV와 경찰서 수 계산
+    cctv_count = 0
+    police_station_count = 0
+
+    for _, cctv_row in cctv_locations.iterrows():
+        cctv_lat, cctv_lon = cctv_row['WGS84위도'], cctv_row['WGS84경도']
+        if haversine(circle_center[0], circle_center[1], cctv_lat, cctv_lon) <= distance_between_arrows * 500:
+            cctv_count += 1
+
+    for _, police_row in police_locations.iterrows():
+        police_lat, police_lon = police_row['위도'], police_row['경도']
+        if haversine(circle_center[0], circle_center[1], police_lat, police_lon) <= distance_between_arrows * 500:
+            police_station_count += 1
+
+    # 안전지수 계산
+    circle_area = math.pi * (distance_between_arrows * 500) ** 2
+    safety_index = (cctv_count + police_station_count) / circle_area
+
+    # 안전지수에 따른 마커 표시
+    if safety_index >= 0.1:
+        circle_color = 'green'
+    elif safety_index >= 0.05:
+        circle_color = 'lightgreen'
+    else:
+        circle_color = 'red'
+
+    circle = folium.Circle(
+        circle_center, radius=distance_between_arrows * 500, color=circle_color, fill=True, fill_opacity=0.2
+    )
     circle.add_to(m)
+    folium.Marker(circle_center, icon=folium.Icon(color=circle_color), tooltip=f'안전지수: {safety_index:.2f}').add_to(m)
 
-cctv_data_file = r"C:\Users\minsoo\OneDrive - 창원대학교\바탕 화면\창원cctv_data.csv"
-cctv_df = pd.read_csv(cctv_data_file)
-cctv_locations = cctv_df[['WGS84위도', 'WGS84경도']]
-
-# CCTV 위치 - Marker
-for _, row in cctv_locations.iterrows():
-    lat, lon = row['WGS84위도'], row['WGS84경도']
-    folium.Marker([lat, lon], icon=folium.Icon(color='green'), tooltip='CCTV 위치').add_to(m)
-
-police_data_file = r"C:\Users\minsoo\OneDrive - 창원대학교\바탕 화면\창원police_data.csv"
-police_df = pd.read_csv(police_data_file)
-police_locations = police_df[['위도', '경도']]
-
-# Police 위치 - Marker
-for _, row in police_locations.iterrows():
-    lat, lon = row['위도'], row['경도']
-    folium.Marker([lat, lon], icon=folium.Icon(color='blue'), tooltip='경찰서 위치').add_to(m)
 
 m.save('safe_path_tmap.html')
