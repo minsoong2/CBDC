@@ -6,7 +6,6 @@ import haversine
 import math
 from folium.plugins import MarkerCluster
 
-
 start_lat = 35.22241510564285
 start_lng = 128.6879361625245
 end_lat = 35.236619713404615
@@ -87,7 +86,6 @@ for i in range(interval):
     end_coord = coordinates[end_idx]
 
     distance_between_arrows = haversine.hs(start_coord[0], start_coord[1], end_coord[0], end_coord[1])
-
     circle_center = ((start_coord[0] + end_coord[0]) / 2, (start_coord[1] + end_coord[1]) / 2)
 
     # 원 안에 있는 CCTV와 경찰서 수 계산
