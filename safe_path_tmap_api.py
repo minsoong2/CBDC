@@ -7,26 +7,6 @@ import math
 from folium.plugins import MarkerCluster
 
 
-def haversine(lat1, lon1, lat2, lon2):
-    # 지구 radius (km)
-    radius = 6371
-
-    lat1 = math.radians(lat1)
-    lon1 = math.radians(lon1)
-    lat2 = math.radians(lat2)
-    lon2 = math.radians(lon2)
-
-    dlat = lat2 - lat1
-    dlon = lon2 - lon1
-
-    # Haversine 공식 활용
-    a = math.sin(dlat/2)**2 + math.cos(lat1) * math.cos(lat2) * math.sin(dlon/2)**2
-    c = 2 * math.atan2(math.sqrt(a), math.sqrt(1-a))
-    distance = radius * c
-
-    return distance
-
-
 start_lat = 35.22241510564285
 start_lng = 128.6879361625245
 end_lat = 35.236619713404615
@@ -106,7 +86,7 @@ for i in range(interval):
     start_coord = coordinates[start_idx]
     end_coord = coordinates[end_idx]
 
-    distance_between_arrows = haversine(start_coord[0], start_coord[1], end_coord[0], end_coord[1])
+    distance_between_arrows = haversine.hs(start_coord[0], start_coord[1], end_coord[0], end_coord[1])
 
     circle_center = ((start_coord[0] + end_coord[0]) / 2, (start_coord[1] + end_coord[1]) / 2)
 
@@ -116,12 +96,12 @@ for i in range(interval):
 
     for _, cctv_row in cctv_locations.iterrows():
         cctv_lat, cctv_lon = cctv_row['WGS84위도'], cctv_row['WGS84경도']
-        if haversine(circle_center[0], circle_center[1], cctv_lat, cctv_lon) <= distance_between_arrows * 500:
+        if haversine.hs(circle_center[0], circle_center[1], cctv_lat, cctv_lon) <= distance_between_arrows * 500:
             cctv_count += 1
 
     for _, police_row in police_locations.iterrows():
         police_lat, police_lon = police_row['위도'], police_row['경도']
-        if haversine(circle_center[0], circle_center[1], police_lat, police_lon) <= distance_between_arrows * 500:
+        if haversine.hs(circle_center[0], circle_center[1], police_lat, police_lon) <= distance_between_arrows * 500:
             police_station_count += 1
 
     # 안전지수 계산

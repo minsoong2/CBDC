@@ -1,7 +1,7 @@
 import math
 
 
-def haversine(lat1, lon1, lat2, lon2):
+def hs(lat1, lon1, lat2, lon2):
     # 지구 radius
     radius = 6371  # km
 
