@@ -88,7 +88,7 @@ for i in range(interval):
     distance_between_arrows = haversine.hs(start_coord[0], start_coord[1], end_coord[0], end_coord[1])
     circle_center = ((start_coord[0] + end_coord[0]) / 2, (start_coord[1] + end_coord[1]) / 2)
 
-    # 원 안에 있는 CCTV와 경찰서 수 계산
+    # 원 안에 있는 CCTV와 경찰서 수 count
     cctv_count = 0
     police_station_count = 0
 
@@ -102,7 +102,7 @@ for i in range(interval):
         if haversine.hs(circle_center[0], circle_center[1], police_lat, police_lon) <= distance_between_arrows * 500:
             police_station_count += 1
 
-    # 안전지수 계산
+    # 안전지수 = (CCTV_count + 경찰서_count) / 원의 면적
     circle_area = math.pi * (distance_between_arrows * 500) ** 2
     safety_index = (cctv_count + police_station_count) / circle_area
 
@@ -119,6 +119,11 @@ for i in range(interval):
     )
     circle.add_to(m)
     folium.Marker(circle_center, icon=folium.Icon(color=circle_color), tooltip=f'안전지수: {safety_index:.2f}').add_to(m)
+# 안전지수에 대해 고려할 것
+# CCTV와 경찰서 거리 기반 지수: CCTV와 경찰서까지의 거리를 고려한 지수. 더 가까운 CCTV와 경찰서에 가중치 부여.
+# 안전지수 = (1 / (CCTV와의 평균 거리)) + (1 / (경찰서와의 평균 거리))
 
+# !!!범죄율!!!과 인구 밀도 고려 지수: 범죄율과 지역 인구 밀도를 고려한 복합 지수.
+# 안전지수 = (인구 밀도 * (1 - 범죄율))
 
 m.save('safe_path_tmap.html')
