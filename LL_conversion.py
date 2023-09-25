@@ -7,23 +7,22 @@ def get_geocode(address):
     client_id = 'a0lrtua0a3'
     client_secret = '3BKNDSMe8An3ZZPdbzthZPRSBfWIYPu31POUGXDL'
 
-    # 도로명 주소 인코딩후 URL생성
+    # 도로명 주소 인코딩 -> URL 생성
     encoded_address = requests.utils.quote(address)
 
     # API 호출 URL
     url = f'https://naveropenapi.apigw.ntruss.com/map-geocode/v2/geocode?query={encoded_address}'
 
-    # HTTP 요청 헤더 설정
+    # HTTP 요청 헤더
     headers = {
         'X-NCP-APIGW-API-KEY-ID': client_id,
         'X-NCP-APIGW-API-KEY': client_secret,
     }
 
-    # API 호출 후 응답
     response = requests.get(url, headers=headers)
-    # JSON parsing
     data = response.json()
     print(data)
+
     # 위도 경도 추출
     if data.get('status') == 'OK' and data.get('addresses'):
         location = data['addresses'][0]
@@ -35,7 +34,6 @@ def get_geocode(address):
         return None, None
 
 
-# 파일에서 도로명 주소를 읽어오기
 file_path = 'C:/Users/minsoo/OneDrive - 창원대학교/바탕 화면/police_location.txt'
 data_to_save = []
 

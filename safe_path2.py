@@ -88,19 +88,17 @@ for i in range(interval):
     distance_between_arrows = haversine.hs(start_coord[0], start_coord[1], end_coord[0], end_coord[1])
     circle_center = ((start_coord[0] + end_coord[0]) / 2, (start_coord[1] + end_coord[1]) / 2)
 
-    # Calculate the average distances to CCTV and police stations within the circle
     avg_cctv_distance = sum(
         haversine.hs(circle_center[0], circle_center[1], lat, lon)
         for lat, lon in cctv_locations.values
         if haversine.hs(circle_center[0], circle_center[1], lat, lon) <= distance_between_arrows * 500
-    ) / (len(cctv_locations) + 1e-6)  # Adding a small value to prevent division by zero
+    ) / (len(cctv_locations) + 1e-6)
     avg_police_distance = sum(
         haversine.hs(circle_center[0], circle_center[1], lat, lon)
         for lat, lon in police_locations.values
         if haversine.hs(circle_center[0], circle_center[1], lat, lon) <= distance_between_arrows * 500
-    ) / (len(police_locations) + 1e-6)  # Adding a small value to prevent division by zero
+    ) / (len(police_locations) + 1e-6)
 
-    # Calculate the safety index based on the average distances
     safety_index = (1 / avg_cctv_distance) + (1 / avg_police_distance)
 
     # 안전지수에 따른 마커 표시
