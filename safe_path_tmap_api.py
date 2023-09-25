@@ -62,7 +62,8 @@ cctv_locations = cctv_df[['WGS84위도', 'WGS84경도']]
 # CCTV 위치 - Marker
 for _, row in cctv_locations.iterrows():
     lat, lon = row['WGS84위도'], row['WGS84경도']
-    folium.Marker([lat, lon], icon=folium.Icon(color='lightblue'), tooltip='CCTV 위치').add_to(marker_cluster)
+    text = f'CCTV 위도: {lat} 경도: {lon}'
+    folium.Marker([lat, lon], icon=folium.Icon(color='lightblue'), tooltip=text).add_to(marker_cluster)
 
 police_data_file = r"C:\Users\minsoo\OneDrive - 창원대학교\바탕 화면\창원police_data.csv"
 police_df = pd.read_csv(police_data_file)
@@ -71,7 +72,8 @@ police_locations = police_df[['위도', '경도']]
 # Police 위치 - Marker
 for _, row in police_locations.iterrows():
     lat, lon = row['위도'], row['경도']
-    folium.Marker([lat, lon], icon=folium.Icon(color='blue'), tooltip='경찰서 위치').add_to(marker_cluster)
+    text = f'Police 위도: {lat} 경도: {lon}'
+    folium.Marker([lat, lon], icon=folium.Icon(color='blue'), tooltip=text).add_to(marker_cluster)
 
 marker_cluster.add_to(m)
 

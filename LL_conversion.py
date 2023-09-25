@@ -34,7 +34,8 @@ def get_geocode(address):
         return None, None
 
 
-file_path = 'C:/Users/minsoo/OneDrive - 창원대학교/바탕 화면/police_location.txt'
+# 변경
+file_path = 'C:/Users/minsoo/OneDrive - 창원대학교/바탕 화면/fire_location.txt'
 data_to_save = []
 
 with open(file_path, 'r', encoding='utf-8') as file:
@@ -47,8 +48,8 @@ with open(file_path, 'r', encoding='utf-8') as file:
         else:
             print(address)
 
-# CSV 파일로 저장
-with open('C:/Users/minsoo/OneDrive - 창원대학교/바탕 화면/geocoded_addresses.csv', 'w', newline='') as csvfile:
+# CSV 파일로 저장 - 변경
+with open('C:/Users/minsoo/OneDrive - 창원대학교/바탕 화면/geocoded_addresses_fire.csv', 'w', newline='') as csvfile:
     csv_writer = csv.writer(csvfile)
     csv_writer.writerow(['도로명 주소', '위도', '경도'])
     csv_writer.writerows(data_to_save)
