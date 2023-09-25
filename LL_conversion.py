@@ -36,9 +36,7 @@ def get_geocode(address):
 
 
 # 파일에서 도로명 주소를 읽어오기
-file_path = 'C:/Users/minsoo/OneDrive - 창원대학교/바탕 화면/police_location.txt'  # 입력 파일 경로 설정
-
-# CSV 파일로 저장할 데이터를 담을 리스트
+file_path = 'C:/Users/minsoo/OneDrive - 창원대학교/바탕 화면/police_location.txt'
 data_to_save = []
 
 with open(file_path, 'r', encoding='utf-8') as file:
