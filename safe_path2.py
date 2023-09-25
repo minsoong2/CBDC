@@ -51,13 +51,13 @@ plugins.PolyLineTextPath(
 # MarkerCluster object - marker 표시
 marker_cluster = MarkerCluster()
 
-# color argument of Icon should be one of:
-# {'black', 'white', 'green', 'lightgreen', 'darkred', 'lightred', 'cadetblue', 'red', 'darkpurple',
-# 'orange', 'purple', 'darkgreen', 'blue', 'lightgray', 'pink', 'gray', 'lightblue', 'beige', 'darkblue'}
-
 cctv_data_file = r"C:\Users\minsoo\OneDrive - 창원대학교\바탕 화면\창원cctv_data.csv"
 cctv_df = pd.read_csv(cctv_data_file)
 cctv_locations = cctv_df[['WGS84위도', 'WGS84경도']]
+
+# color argument of Icon should be one of:
+# {'black', 'white', 'green', 'lightgreen', 'darkred', 'lightred', 'cadetblue', 'red', 'darkpurple',
+# 'orange', 'purple', 'darkgreen', 'blue', 'lightgray', 'pink', 'gray', 'lightblue', 'beige', 'darkblue'}
 
 # CCTV 위치 - Marker
 for _, row in cctv_locations.iterrows():
@@ -88,29 +88,26 @@ for i in range(interval):
     distance_between_arrows = haversine.hs(start_coord[0], start_coord[1], end_coord[0], end_coord[1])
     circle_center = ((start_coord[0] + end_coord[0]) / 2, (start_coord[1] + end_coord[1]) / 2)
 
-    # 원 안에 있는 CCTV와 경찰서 수 count
-    cctv_count = 0
-    police_station_count = 0
+    # Calculate the average distances to CCTV and police stations within the circle
+    avg_cctv_distance = sum(
+        haversine.hs(circle_center[0], circle_center[1], lat, lon)
+        for lat, lon in cctv_locations.values
+        if haversine.hs(circle_center[0], circle_center[1], lat, lon) <= distance_between_arrows * 500
+    ) / (len(cctv_locations) + 1e-6)  # Adding a small value to prevent division by zero
+    avg_police_distance = sum(
+        haversine.hs(circle_center[0], circle_center[1], lat, lon)
+        for lat, lon in police_locations.values
+        if haversine.hs(circle_center[0], circle_center[1], lat, lon) <= distance_between_arrows * 500
+    ) / (len(police_locations) + 1e-6)  # Adding a small value to prevent division by zero
 
-    for _, cctv_row in cctv_locations.iterrows():
-        cctv_lat, cctv_lon = cctv_row['WGS84위도'], cctv_row['WGS84경도']
-        if haversine.hs(circle_center[0], circle_center[1], cctv_lat, cctv_lon) <= distance_between_arrows * 500:
-            cctv_count += 1
-
-    for _, police_row in police_locations.iterrows():
-        police_lat, police_lon = police_row['위도'], police_row['경도']
-        if haversine.hs(circle_center[0], circle_center[1], police_lat, police_lon) <= distance_between_arrows * 500:
-            police_station_count += 1
-
-    # 안전지수 = (CCTV_count + 경찰서_count) / 원의 면적
-    circle_area = math.pi * (distance_between_arrows * 500) ** 2
-    safety_index = (cctv_count + police_station_count) / circle_area
+    # Calculate the safety index based on the average distances
+    safety_index = (1 / avg_cctv_distance) + (1 / avg_police_distance)
 
     # 안전지수에 따른 마커 표시
     if safety_index >= 0.1:
         circle_color = 'green'
     elif safety_index >= 0.05:
-        circle_color = 'orange'
+        circle_color = 'lightgreen'
     else:
         circle_color = 'red'
 
@@ -121,7 +118,10 @@ for i in range(interval):
     folium.Marker(circle_center, icon=folium.Icon(color=circle_color), tooltip=f'안전지수: {safety_index:.2f}').add_to(m)
 
 # 안전지수에 대해 고려할 것
-# !!!범죄율!!!과 인구 밀도 고려 지수: 범죄율과 지역 인구 밀도를 고려한 복합 지수 -> 안전지수 = (인구 밀도 * (1 - 범죄율))
-# cctv방면 1~8
+# CCTV와 경찰서 거리 기반 지수: CCTV와 경찰서까지의 거리를 고려한 지수. 더 가까운 CCTV와 경찰서에 가중치 부여.
+# 안전지수 = (1 / (CCTV와의 평균 거리)) + (1 / (경찰서와의 평균 거리))
 
-m.save('safe_path_tmap.html')
+# !!!범죄율!!!과 인구 밀도 고려 지수: 범죄율과 지역 인구 밀도를 고려한 복합 지수.
+# 안전지수 = (인구 밀도 * (1 - 범죄율))
+
+m.save('safe_path_tmap2.html')
