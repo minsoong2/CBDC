@@ -62,18 +62,49 @@ cctv_locations = cctv_df[['WGS84위도', 'WGS84경도']]
 # CCTV 위치 - Marker
 for _, row in cctv_locations.iterrows():
     lat, lon = row['WGS84위도'], row['WGS84경도']
-    text = f'CCTV 위도: {lat} 경도: {lon}'
-    folium.Marker([lat, lon], icon=folium.Icon(color='lightblue'), tooltip=text).add_to(marker_cluster)
+    popup_text = f'CCTV <br> 위도: {lat} <br> 경도: {lon}'  # 팝업에 표시할 텍스트
+    iframe_html = f'<iframe width="100%" height="315" src="http://www.utic.go.kr/view/map/cctvStream.jsp?' \
+                  f'cctvid=L250001&cctvname=KBS%25EC%2582%25AC%25EA%25B1%25B0%25EB%25A6%25AC&kind=Y&cctvip=140' \
+                  f'&cctvch=12&id=null&cctvpasswd=null&cctvport=null&minX=128.59823203434868&minY=35.188051060156894' \
+                  f'&maxX=128.74501945865873&maxY=35.2574447382778" frameborder="0" allowfullscreen></iframe>'
+
+    if lat == 35.22875:
+        popup_html = f'<div id="cctv-video" style="width: 370px; height: 370px; background-color: white; ' \
+                     f'font-size: 12px;">{popup_text}<br>{iframe_html}</div>'
+    else:
+        popup_html = f'<div style="width: 150px; height: 45px; background-color: white; ' \
+                     f'font-size: 12px;">{popup_text}</div>'
+
+    folium.Marker([lat, lon], icon=folium.Icon(color='lightblue'),
+                  popup=folium.Popup(popup_html, max_width=400)).add_to(marker_cluster)
 
 police_data_file = r"C:\Users\minsoo\OneDrive - 창원대학교\바탕 화면\창원police_data.csv"
 police_df = pd.read_csv(police_data_file)
-police_locations = police_df[['위도', '경도']]
+police_locations = police_df[['위도', '경도', '경찰서이름']]
 
 # Police 위치 - Marker
 for _, row in police_locations.iterrows():
-    lat, lon = row['위도'], row['경도']
-    text = f'Police 위도: {lat} 경도: {lon}'
-    folium.Marker([lat, lon], icon=folium.Icon(color='blue'), tooltip=text).add_to(marker_cluster)
+    lat, lon, police_station_name = row['위도'], row['경도'], row['경찰서이름']
+    popup_text = f'{police_station_name}<br>위도: {lat}<br>경도: {lon}'
+
+    popup_html = f'<div style="width: 150px; height: 47px; background-color: white; font-size: 12px;">{popup_text}</div>'
+
+    folium.Marker([lat, lon], icon=folium.Icon(color='blue'),
+                  popup=folium.Popup(popup_html, max_width=250)).add_to(marker_cluster)
+
+fire_data_file = r"C:\Users\minsoo\OneDrive - 창원대학교\바탕 화면\창원fire_data.csv"
+fire_df = pd.read_csv(fire_data_file, encoding='utf-8')  # 파일 인코딩 설정 필요
+fire_locations = fire_df[['위도', '경도', '소방서이름']]
+
+# Fire 위치 - Marker
+for _, row in fire_locations.iterrows():
+    lat, lon, fire_station_name = row['위도'], row['경도'], row['소방서이름']
+    popup_text = f'{fire_station_name}<br>위도: {lat}<br>경도: {lon}'
+
+    popup_html = f'<div style="width: 150px; height: 50px; background-color: white; font-size: 12px;">{popup_text}</div>'
+
+    folium.Marker([lat, lon], icon=folium.Icon(color='cadetblue'),
+                  popup=folium.Popup(popup_html, max_width=250)).add_to(marker_cluster)
 
 marker_cluster.add_to(m)
 
@@ -104,7 +135,8 @@ for i in range(interval):
         if haversine.hs(circle_center[0], circle_center[1], police_lat, police_lon) <= distance_between_arrows * 500:
             police_station_count += 1
 
-    # 안전지수 = (CCTV_count + 경찰서_count) / 원의 면적
+    # 안전지수 = { (CCTV_count * 1.(0.01 ~ 0.08) + 경찰서_count * (w)1.2 + 편의점_count + 소방서_count) / 원의 면적 }
+    #           + 1~4(:등급)*(-0.005)
     circle_area = math.pi * (distance_between_arrows * 500) ** 2
     safety_index = (cctv_count + police_station_count) / circle_area
 
@@ -122,9 +154,5 @@ for i in range(interval):
     circle.add_to(m)
     folium.Marker(circle_center, icon=folium.Icon(color=circle_color), tooltip=f'안전지수: {safety_index:.2f}').add_to(m)
 
-# 안전지수에 대해 고려할 것
-# !!!범죄율!!!과 인구 밀도 고려 지수: 범죄율과 지역 인구 밀도를 고려한 복합 지수 -> 안전지수 = (인구 밀도 * (1 - 범죄율))
-# cctv방면 1~8
-# 소방서 및 24시간 편의점
 
 m.save('safe_path_tmap.html')
