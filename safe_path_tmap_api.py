@@ -55,8 +55,9 @@ marker_cluster = MarkerCluster()
 # {'black', 'white', 'green', 'lightgreen', 'darkred', 'lightred', 'cadetblue', 'red', 'darkpurple',
 # 'orange', 'purple', 'darkgreen', 'blue', 'lightgray', 'pink', 'gray', 'lightblue', 'beige', 'darkblue'}
 
+
 cctv_data_file = r"C:\Users\minsoo\OneDrive - 창원대학교\바탕 화면\창원cctv_data.csv"
-cctv_df = pd.read_csv(cctv_data_file)
+cctv_df = pd.read_csv(cctv_data_file, encoding='utf-8')
 cctv_locations = cctv_df[['WGS84위도', 'WGS84경도']]
 
 # CCTV 위치 - Marker
@@ -78,8 +79,9 @@ for _, row in cctv_locations.iterrows():
     folium.Marker([lat, lon], icon=folium.Icon(color='lightblue'),
                   popup=folium.Popup(popup_html, max_width=400)).add_to(marker_cluster)
 
+
 police_data_file = r"C:\Users\minsoo\OneDrive - 창원대학교\바탕 화면\창원police_data.csv"
-police_df = pd.read_csv(police_data_file)
+police_df = pd.read_csv(police_data_file, encoding='utf-8')
 police_locations = police_df[['위도', '경도', '경찰서이름']]
 
 # Police 위치 - Marker
@@ -92,8 +94,9 @@ for _, row in police_locations.iterrows():
     folium.Marker([lat, lon], icon=folium.Icon(color='blue'),
                   popup=folium.Popup(popup_html, max_width=250)).add_to(marker_cluster)
 
+
 fire_data_file = r"C:\Users\minsoo\OneDrive - 창원대학교\바탕 화면\창원fire_data.csv"
-fire_df = pd.read_csv(fire_data_file, encoding='utf-8')  # 파일 인코딩 설정 필요
+fire_df = pd.read_csv(fire_data_file, encoding='utf-8')
 fire_locations = fire_df[['위도', '경도', '소방서이름']]
 
 # Fire 위치 - Marker
@@ -105,6 +108,22 @@ for _, row in fire_locations.iterrows():
 
     folium.Marker([lat, lon], icon=folium.Icon(color='cadetblue'),
                   popup=folium.Popup(popup_html, max_width=250)).add_to(marker_cluster)
+
+
+store_data_file = r"C:\Users\minsoo\OneDrive - 창원대학교\바탕 화면\geocoded_addresses_store.csv"
+store_df = pd.read_csv(store_data_file, encoding='utf-8')
+store_locations = store_df[['위도', '경도']]
+
+# Store 위치 - Marker
+for _, row in store_locations.iterrows():
+    lat, lon = row['위도'], row['경도']
+    popup_text = f'편의점 <br> 위도: {lat}<br> 경도: {lon}'
+
+    popup_html = f'<div style="width: 150px; height: 47px; background-color: white; font-size: 12px;">{popup_text}</div>'
+
+    folium.Marker([lat, lon], icon=folium.Icon(color='cadetblue'),
+                  popup=folium.Popup(popup_html, max_width=250)).add_to(marker_cluster)
+
 
 marker_cluster.add_to(m)
 
