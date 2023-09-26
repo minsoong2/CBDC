@@ -101,7 +101,7 @@ for _, row in fire_locations.iterrows():
     lat, lon, fire_station_name = row['위도'], row['경도'], row['소방서이름']
     popup_text = f'{fire_station_name}<br>위도: {lat}<br>경도: {lon}'
 
-    popup_html = f'<div style="width: 150px; height: 50px; background-color: white; font-size: 12px;">{popup_text}</div>'
+    popup_html = f'<div style="width: 150px; height: 47px; background-color: white; font-size: 12px;">{popup_text}</div>'
 
     folium.Marker([lat, lon], icon=folium.Icon(color='cadetblue'),
                   popup=folium.Popup(popup_html, max_width=250)).add_to(marker_cluster)
