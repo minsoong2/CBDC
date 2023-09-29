@@ -6,10 +6,10 @@ import haversine
 import math
 from folium.plugins import MarkerCluster
 
-start_lat = 35.22241510564285
-start_lng = 128.6879361625245
-end_lat = 35.236619713404615
-end_lng = 128.69428289085678
+start_lat = 35.22254876728935
+start_lng = 128.68869123457196
+end_lat = 35.24131123348904
+end_lng = 128.69584150197073
 
 m = folium.Map(location=[start_lat, start_lng], zoom_start=15)
 folium.Marker([start_lat, start_lng], tooltip='출발지').add_to(m)
@@ -58,7 +58,7 @@ marker_cluster = MarkerCluster()
 
 cctv_data_file = r"C:\Users\minsoo\OneDrive - 창원대학교\바탕 화면\창원cctv_data.csv"
 cctv_df = pd.read_csv(cctv_data_file, encoding='utf-8')
-cctv_locations = cctv_df[['WGS84위도', 'WGS84경도']]
+cctv_locations = cctv_df[['WGS84위도', 'WGS84경도', '촬영방면']]
 
 # CCTV 위치 - Marker
 for _, row in cctv_locations.iterrows():
@@ -141,15 +141,16 @@ for i in range(interval):
     print("diameter:", distance_2r, "circle_center:", circle_center)
 
     # 원 안에 있는 CCTV, police, fire, store -> count
-    cctv_station_count = 0
+    cctv_station_count, cctv_station_count_dir = 0, 0
     police_station_count = 0
     fire_station_count = 0
     store_station_count = 0
 
     for _, cctv_row in cctv_locations.iterrows():
-        cctv_lat, cctv_lon = cctv_row['WGS84위도'], cctv_row['WGS84경도']
+        cctv_lat, cctv_lon, cctv_dir = cctv_row['WGS84위도'], cctv_row['WGS84경도'], cctv_row['촬영방면']
         if haversine.hs(circle_center[0], circle_center[1], cctv_lat, cctv_lon) <= (distance_2r / 2):
             cctv_station_count += 1
+            cctv_station_count_dir += 1 + 0.01 * cctv_dir
 
     for _, police_row in police_locations.iterrows():
         police_lat, police_lon = police_row['위도'], police_row['경도']
@@ -169,14 +170,14 @@ for i in range(interval):
     print("cctv_count:", cctv_station_count, "police_count:", police_station_count, "fire_count:", fire_station_count, "store_count:", store_station_count)
 
     circle_area = math.pi * ((distance_2r / 2) ** 2) * 500
-    # 안전지수 = { (CCTV_count * 1.(0.01 ~ 0.12) + 경찰서_count * (w)1.2 + 편의점_count + 소방서_count) / 원의 면적 } + 1~4(:등급)*(-0.005)
-    safety_index = (cctv_station_count + (police_station_count * 1.2) + fire_station_count + store_station_count) / circle_area
+    # 안전지수 = { (CCTV_count * 1.(0.01 ~ 0.12) + 경찰서_count * (w: 2.0) + 편의점_count + 소방서_count) / circle_area } + 1~4(:등급)*(-0.005)
+    safety_index = (cctv_station_count_dir + (police_station_count * 2.0) + fire_station_count + store_station_count) / circle_area
     print("circle_area:", circle_area, "안전지수:", safety_index, '\n')
 
     # 안전지수에 따른 마커 표시
-    if safety_index >= 0.1:
+    if safety_index >= 0.04:
         circle_color = 'green'
-    elif safety_index >= 0.05:
+    elif safety_index >= 0.02:
         circle_color = 'orange'
     else:
         circle_color = 'red'
