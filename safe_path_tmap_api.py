@@ -124,7 +124,6 @@ for _, row in store_locations.iterrows():
     folium.Marker([lat, lon], icon=folium.Icon(color='cadetblue'),
                   popup=folium.Popup(popup_html, max_width=250)).add_to(marker_cluster)
 
-
 marker_cluster.add_to(m)
 
 interval = 10
@@ -137,27 +136,42 @@ for i in range(interval):
     start_coord = coordinates[start_idx]
     end_coord = coordinates[end_idx]
 
-    distance_between_arrows = haversine.hs(start_coord[0], start_coord[1], end_coord[0], end_coord[1])
+    distance_2r = haversine.hs(start_coord[0], start_coord[1], end_coord[0], end_coord[1])
     circle_center = ((start_coord[0] + end_coord[0]) / 2, (start_coord[1] + end_coord[1]) / 2)
+    print("diameter:", distance_2r, "circle_center:", circle_center)
 
-    # 원 안에 있는 CCTV와 경찰서 수 count
-    cctv_count = 0
+    # 원 안에 있는 CCTV, police, fire, store -> count
+    cctv_station_count = 0
     police_station_count = 0
+    fire_station_count = 0
+    store_station_count = 0
 
     for _, cctv_row in cctv_locations.iterrows():
         cctv_lat, cctv_lon = cctv_row['WGS84위도'], cctv_row['WGS84경도']
-        if haversine.hs(circle_center[0], circle_center[1], cctv_lat, cctv_lon) <= distance_between_arrows * 500:
-            cctv_count += 1
+        if haversine.hs(circle_center[0], circle_center[1], cctv_lat, cctv_lon) <= (distance_2r / 2):
+            cctv_station_count += 1
 
     for _, police_row in police_locations.iterrows():
         police_lat, police_lon = police_row['위도'], police_row['경도']
-        if haversine.hs(circle_center[0], circle_center[1], police_lat, police_lon) <= distance_between_arrows * 500:
+        if haversine.hs(circle_center[0], circle_center[1], police_lat, police_lon) <= (distance_2r / 2):
             police_station_count += 1
 
-    # 안전지수 = { (CCTV_count * 1.(0.01 ~ 0.08) + 경찰서_count * (w)1.2 + 편의점_count + 소방서_count) / 원의 면적 }
-    #           + 1~4(:등급)*(-0.005)
-    circle_area = math.pi * (distance_between_arrows * 500) ** 2
-    safety_index = (cctv_count + police_station_count) / circle_area
+    for _, fire_row in fire_locations.iterrows():
+        fire_lat, fire_lon = fire_row['위도'], fire_row['경도']
+        if haversine.hs(circle_center[0], circle_center[1], fire_lat, fire_lon) <= (distance_2r / 2):
+            fire_station_count += 1
+
+    for _, store_row in store_locations.iterrows():
+        store_lat, store_lon = store_row['위도'], store_row['경도']
+        if haversine.hs(circle_center[0], circle_center[1], store_lat, store_lon) <= (distance_2r / 2):
+            store_station_count += 1
+
+    print("cctv_count:", cctv_station_count, "police_count:", police_station_count, "fire_count:", fire_station_count, "store_count:", store_station_count)
+
+    circle_area = math.pi * ((distance_2r / 2) ** 2) * 500
+    # 안전지수 = { (CCTV_count * 1.(0.01 ~ 0.12) + 경찰서_count * (w)1.2 + 편의점_count + 소방서_count) / 원의 면적 } + 1~4(:등급)*(-0.005)
+    safety_index = (cctv_station_count + (police_station_count * 1.2) + fire_station_count + store_station_count) / circle_area
+    print("circle_area:", circle_area, "안전지수:", safety_index, '\n')
 
     # 안전지수에 따른 마커 표시
     if safety_index >= 0.1:
@@ -168,7 +182,7 @@ for i in range(interval):
         circle_color = 'red'
 
     circle = folium.Circle(
-        circle_center, radius=distance_between_arrows * 500, color=circle_color, fill=True, fill_opacity=0.2
+        circle_center, radius=(distance_2r / 2) * 1000, color=circle_color, fill=True, fill_opacity=0.2
     )
     circle.add_to(m)
     folium.Marker(circle_center, icon=folium.Icon(color=circle_color), tooltip=f'안전지수: {safety_index:.2f}').add_to(m)
