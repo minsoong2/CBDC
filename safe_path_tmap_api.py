@@ -6,14 +6,17 @@ import haversine
 import math
 from folium.plugins import MarkerCluster
 
+
 start_lat = 35.22254876728935
 start_lng = 128.68869123457196
 end_lat = 35.24131123348904
 end_lng = 128.69584150197073
 
+
 m = folium.Map(location=[start_lat, start_lng], zoom_start=15)
 folium.Marker([start_lat, start_lng], tooltip='출발지').add_to(m)
 folium.Marker([end_lat, end_lng], tooltip='목적지').add_to(m)
+
 
 # Tmap API 키
 tmap_api_key = 'QaALuzWbgm8PXyhzGSGgM9HHtAdgGuGL7JWocrK9'
@@ -48,8 +51,10 @@ plugins.PolyLineTextPath(
     attributes={'fill': 'red', 'font-weight': 'bold', 'font-size': '12'},
 ).add_to(m)
 
+
 # MarkerCluster object - marker 표시
 marker_cluster = MarkerCluster()
+
 
 # color argument of Icon should be one of:
 # {'black', 'white', 'green', 'lightgreen', 'darkred', 'lightred', 'cadetblue', 'red', 'darkpurple',
@@ -124,7 +129,9 @@ for _, row in store_locations.iterrows():
     folium.Marker([lat, lon], icon=folium.Icon(color='cadetblue'),
                   popup=folium.Popup(popup_html, max_width=250)).add_to(marker_cluster)
 
+
 marker_cluster.add_to(m)
+
 
 interval = 10
 
