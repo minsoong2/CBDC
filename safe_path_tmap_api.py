@@ -87,7 +87,7 @@ for _, row in cctv_locations.iterrows():
 
 police_data_file = r"C:\Users\minsoo\OneDrive - 창원대학교\바탕 화면\창원police_data.csv"
 police_df = pd.read_csv(police_data_file, encoding='utf-8')
-police_locations = police_df[['위도', '경도', '경찰서이름']]
+police_locations = police_df[['위도', '경도', '경찰서이름', '치안사고등급']]
 
 # Police 위치 - Marker
 for _, row in police_locations.iterrows():
@@ -149,7 +149,7 @@ for i in range(interval):
 
     # 원 안에 있는 CCTV, police, fire, store -> count
     cctv_station_count, cctv_station_count_dir = 0, 0
-    police_station_count = 0
+    police_station_count, police_station_count_security = 0, 0
     fire_station_count = 0
     store_station_count = 0
 
@@ -160,9 +160,10 @@ for i in range(interval):
             cctv_station_count_dir += 1 + 0.01 * cctv_dir
 
     for _, police_row in police_locations.iterrows():
-        police_lat, police_lon = police_row['위도'], police_row['경도']
+        police_lat, police_lon, police_security = police_row['위도'], police_row['경도'], police_row['치안사고등급']
         if haversine.hs(circle_center[0], circle_center[1], police_lat, police_lon) <= (distance_2r / 2):
             police_station_count += 1
+            police_station_count_security += police_security * (-0.0005)
 
     for _, fire_row in fire_locations.iterrows():
         fire_lat, fire_lon = fire_row['위도'], fire_row['경도']
@@ -177,8 +178,8 @@ for i in range(interval):
     print("cctv_count:", cctv_station_count, "police_count:", police_station_count, "fire_count:", fire_station_count, "store_count:", store_station_count)
 
     circle_area = math.pi * ((distance_2r / 2) ** 2) * 500
-    # 안전지수 = { (CCTV_count * 1.(0.01 ~ 0.12) + 경찰서_count * (w: 2.0) + 편의점_count + 소방서_count) / circle_area } + 1~4(:등급)*(-0.005)
-    safety_index = (cctv_station_count_dir + (police_station_count * 2.0) + fire_station_count + store_station_count) / circle_area
+    # 안전지수 = { (CCTV_count * 1.(0.01 ~ 0.12) + 경찰서_count * (w: 2.0) + 편의점_count + 소방서_count) / circle_area } + 1~4(:등급)*(-0.0005)
+    safety_index = (cctv_station_count_dir + (police_station_count * 2.0) + fire_station_count + store_station_count) / circle_area + police_station_count_security
     print("circle_area:", circle_area, "안전지수:", safety_index, '\n')
 
     # 안전지수에 따른 마커 표시
