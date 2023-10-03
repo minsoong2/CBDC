@@ -61,7 +61,7 @@ marker_cluster = MarkerCluster()
 # 'orange', 'purple', 'darkgreen', 'blue', 'lightgray', 'pink', 'gray', 'lightblue', 'beige', 'darkblue'}
 
 
-cctv_data_file = r"C:\Users\minsoo\OneDrive - 창원대학교\바탕 화면\창원cctv_data.csv"
+cctv_data_file = r"C:\Users\minsoo\OneDrive - 창원대학교\바탕 화면\창원 빅데이터 공모전\data\창원cctv_data.csv"
 cctv_df = pd.read_csv(cctv_data_file, encoding='utf-8')
 cctv_locations = cctv_df[['WGS84위도', 'WGS84경도', '촬영방면']]
 
@@ -85,7 +85,7 @@ for _, row in cctv_locations.iterrows():
                   popup=folium.Popup(popup_html, max_width=400)).add_to(marker_cluster)
 
 
-police_data_file = r"C:\Users\minsoo\OneDrive - 창원대학교\바탕 화면\창원police_data.csv"
+police_data_file = r"C:\Users\minsoo\OneDrive - 창원대학교\바탕 화면\창원 빅데이터 공모전\data\창원police_data.csv"
 police_df = pd.read_csv(police_data_file, encoding='utf-8')
 police_locations = police_df[['위도', '경도', '경찰서이름', '치안사고등급']]
 
@@ -100,7 +100,7 @@ for _, row in police_locations.iterrows():
                   popup=folium.Popup(popup_html, max_width=250)).add_to(marker_cluster)
 
 
-fire_data_file = r"C:\Users\minsoo\OneDrive - 창원대학교\바탕 화면\창원fire_data.csv"
+fire_data_file = r"C:\Users\minsoo\OneDrive - 창원대학교\바탕 화면\창원 빅데이터 공모전\data\창원fire_data.csv"
 fire_df = pd.read_csv(fire_data_file, encoding='utf-8')
 fire_locations = fire_df[['위도', '경도', '소방서이름']]
 
@@ -115,7 +115,7 @@ for _, row in fire_locations.iterrows():
                   popup=folium.Popup(popup_html, max_width=250)).add_to(marker_cluster)
 
 
-store_data_file = r"C:\Users\minsoo\OneDrive - 창원대학교\바탕 화면\geocoded_addresses_store.csv"
+store_data_file = r"C:\Users\minsoo\OneDrive - 창원대학교\바탕 화면\창원 빅데이터 공모전\data\geocoded_addresses_store.csv"
 store_df = pd.read_csv(store_data_file, encoding='utf-8')
 store_locations = store_df[['위도', '경도']]
 
@@ -178,7 +178,7 @@ for i in range(interval):
     print("cctv_count:", cctv_station_count, "police_count:", police_station_count, "fire_count:", fire_station_count, "store_count:", store_station_count)
 
     circle_area = math.pi * ((distance_2r / 2) ** 2) * 500
-    # 안전지수 = { (CCTV_count * 1.(0.01 ~ 0.12) + 경찰서_count * (w: 2.0) + 편의점_count + 소방서_count) / circle_area } + 1~4(:등급)*(-0.0005)
+    # 안전지수 = { (CCTV_count * 1.(0.01 ~ 0.n) + 경찰서_count * (w: 2.0) + 편의점_count + 소방서_count) / circle_area } + 1~4(:등급)*(-0.0005)
     safety_index = (cctv_station_count_dir + (police_station_count * 2.0) + fire_station_count + store_station_count) / circle_area + police_station_count_security
     print("circle_area:", circle_area, "안전지수:", safety_index, '\n')
 
