@@ -31,7 +31,6 @@ url = f'https://apis.openapi.sk.com/tmap/routes/pedestrian?version=1&format=json
 # - 04 : 교통최적 + 고속도로우선
 # - 10 : 최단거리 + 유/무료
 # - 19 : 교통최적 + 어린이보호구역 회피
-
 response = requests.get(url)
 data = response.json()
 
