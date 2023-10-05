@@ -49,7 +49,7 @@ with open(file_path, 'r', encoding='utf-8') as file:
             print(address)
 
 # CSV 파일로 저장 - 변경
-with open('C:/Users/minsoo/OneDrive - 창원대학교/바탕 화면/geocoded_addresses_store.csv', 'w', newline='', encoding='utf-8') as csvfile:
+with open('C:/Users/minsoo/OneDrive - 창원대학교/바탕 화면/geocoded_addresses_store.csv', 'w', newline='', encoding='utf-8-sig') as csvfile:
     csv_writer = csv.writer(csvfile)
     csv_writer.writerow(['도로명 주소', '위도', '경도'])
     csv_writer.writerows(data_to_save)

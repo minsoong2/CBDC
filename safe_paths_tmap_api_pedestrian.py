@@ -37,9 +37,6 @@ for search_option in search_options:
     response = requests.get(url)
     data = response.json()
 
-    for i in data['features']:
-        print(i)
-
     coordinates = []
     for feature in data['features']:
         if feature['geometry']['type'] == 'LineString':
@@ -125,7 +122,7 @@ for _, row in fire_locations.iterrows():
                   popup=folium.Popup(popup_html, max_width=250)).add_to(marker_cluster)
 
 
-store_data_file = r"C:\Users\minsoo\OneDrive - 창원대학교\바탕 화면\창원 빅데이터 공모전\data\geocoded_addresses_store.csv"
+store_data_file = r"C:\Users\minsoo\OneDrive - 창원대학교\바탕 화면\창원 빅데이터 공모전\data\창원store_data.csv"
 store_df = pd.read_csv(store_data_file, encoding='utf-8')
 store_locations = store_df[['위도', '경도']]
 
