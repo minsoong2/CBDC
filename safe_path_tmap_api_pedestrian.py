@@ -24,13 +24,10 @@ tmap_api_key = 'QaALuzWbgm8PXyhzGSGgM9HHtAdgGuGL7JWocrK9'
 # Tmap API 경로 요청 URL 생성
 url = f'https://apis.openapi.sk.com/tmap/routes/pedestrian?version=1&format=json&appKey={tmap_api_key}&startX={start_lng}&startY={start_lat}&startName=출발지&endX={end_lng}&endY={end_lat}&endName=목적지&searchOption=0'
 # 경로탐색 시 우선순위 옵션 -> searchOption
-# - 00 : 교통최적 + 추천 (기본 값)
-# - 01 : 교통최적 + 무료우선
-# - 02 : 교통최적 + 최소시간
-# - 03 : 교통최적 + 초보
-# - 04 : 교통최적 + 고속도로우선
-# - 10 : 최단거리 + 유/무료
-# - 19 : 교통최적 + 어린이보호구역 회피
+# - 0: 추천 (기본값)
+# - 4: 추천 + 대로우선
+# - 10: 최단
+# - 30: 최단거리 + 계단제외
 response = requests.get(url)
 data = response.json()
 
@@ -177,7 +174,7 @@ for i in range(interval):
     print("cctv_count:", cctv_station_count, "police_count:", police_station_count, "fire_count:", fire_station_count, "store_count:", store_station_count)
 
     circle_area = math.pi * ((distance_2r / 2) ** 2) * 500
-    # 안전지수 = { (CCTV_count * 1.(0.01 ~ 0.n) + 경찰서_count * (w: 2.0) + 편의점_count + 소방서_count) / circle_area } + 1~4(:등급)*(-0.0005)
+    # 안전지수 = { (CCTV_count * 1.(0.01 ~ 0.n) + 경찰서_count * (w: 2.0) + 편의점_count + 소방서_count) / circle_area } + 1~5(:등급)*(-0.0005)
     safety_index = (cctv_station_count_dir + (police_station_count * 2.0) + fire_station_count + store_station_count) / circle_area + police_station_count_security
     print("circle_area:", circle_area, "안전지수:", safety_index, '\n')
 
