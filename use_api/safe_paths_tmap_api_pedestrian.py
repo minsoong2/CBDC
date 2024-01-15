@@ -138,8 +138,6 @@ for _, row in store_locations.iterrows():
 
 
 marker_cluster.add_to(m)
-
-
 interval = 10
 
 for i in range(interval):
