@@ -1,7 +1,7 @@
 import csv
 
 path = "C:/Users/minsoo/OneDrive - 창원대학교/바탕 화면/경찰청_경찰관서 위치 주소 현황_20230811.csv"
-f = open('road_address_csv.txt', 'w', encoding='utf-8')
+f = open('../road_address_csv.txt', 'w', encoding='utf-8')
 found_rows = []
 with open(path, 'r') as csv_file:
     csv_reader = csv.DictReader(csv_file)

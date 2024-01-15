@@ -10,7 +10,7 @@ document = call.text
 root = ET.fromstring(document)
 item_count = int(root.find('.//totalCount').text) // 10 + 1
 
-f = open('road_address_api.txt', 'w', encoding='utf-8')
+f = open('../road_address_api.txt', 'w', encoding='utf-8')
 
 for p in range(1, item_count + 1):
       url = "http://apis.data.go.kr/6480000/gyeongnampoliceoffice/gyeongnampoliceofficeList?serviceKey=" + \
